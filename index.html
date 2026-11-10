@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hostel Mess Menu — what is cooking today?</title>
+<style>
+  :root { --green:#14532D; --cream:#FAF6EF; --ink:#1c2420; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Georgia, 'Times New Roman', serif; background: var(--cream); color: var(--ink); }
+  header { text-align:center; padding: 28px 16px 6px; }
+  h1 { margin:0; color: var(--green); font-size: 30px; }
+  header p { margin:8px 0 0; font-size: 14.5px; color:#43524a; }
+  .days { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding: 18px 12px 4px; }
+  .days button { font-family:inherit; font-size:14px; padding:8px 15px; border-radius:999px; border:1.5px solid var(--green); background:#fff; color:var(--green); cursor:pointer; }
+  .days button.active { background: var(--green); color:#fff; }
+  main { max-width: 860px; margin: 0 auto; padding: 14px 14px 8px; display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  @media (max-width:640px){ main { grid-template-columns: 1fr; } }
+  .card { background:#fff; border:1.5px solid #ddd5c2; border-radius:14px; padding:16px 18px; }
+  .card h2 { margin:0 0 8px; font-size:17px; color: var(--green); }
+  .card ul { margin:0; padding-left:18px; line-height:1.65; font-size:15px; }
+  .notes { max-width:860px; margin: 4px auto 0; padding: 0 14px 26px; }
+  .notes .card h2 { font-size:15px; }
+  .notes li { font-size:13.5px; line-height:1.6; }
+  footer { text-align:center; font-size:12.5px; color:#5a665f; padding: 0 12px 26px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Hostel Mess Menu</h1>
+  <p>The full weekly menu of my hostel mess at IIIT Bhopal — pick a day, see all four meals. Opens on today by default.</p>
+</header>
+
+<div class="days" id="days"></div>
+<main id="meals"></main>
+
+<div class="notes">
+  <div class="card">
+    <h2>Good to know</h2>
+    <ul>
+      <li>Breakfast: the first 15 minutes are veg only — egg is served after that.</li>
+      <li>Gulab Jamun (Thursday lunch): strictly 1 piece per person.</li>
+      <li>Ice cream: 1 scoop per person. Milk: 200 ml per person.</li>
+      <li>Wednesday dinner special: Egg Curry (2 eggs) / Rajma. Friday dinner special: Chicken (150 g) / Paneer.</li>
+      <li>Salad (cucumber and onion) is kept and served separately.</li>
+    </ul>
+  </div>
+</div>
+<footer>Menu as shared by the hostel mess, November 2026. Built with plain HTML, CSS and JavaScript.</footer>
+
+<script>
+"use strict";
+
+/* Weekly menu, exactly as printed by the mess (November 2026). */
+var MENU = {
+  Monday: {
+    Breakfast: ["Poha", "Jalebi", "Chai / Coffee", "Sprouts", "1 Egg / 2 Banana", "Milk (200 ml)"],
+    Lunch: ["Kadhi", "Roti", "Rice", "Salad", "Dum Aloo", "Dahi Bada"],
+    Snacks: ["Chowmin", "Red Sauce", "Chai / Coffee"],
+    Dinner: ["Kala Chana", "Rice", "Salad", "Paneer Paratha", "Achaar"]
+  },
+  Tuesday: {
+    Breakfast: ["Aloo Puri", "1 Egg / 2 Banana", "Sprouts", "Milk (200 ml)"],
+    Lunch: ["Paneer", "Roti", "Rice", "Salad", "Curd"],
+    Snacks: ["Samosa", "Red Chutney", "Green Chutney", "Chai / Coffee"],
+    Dinner: ["White Beans", "Daal", "Roti", "Rice", "Salad", "Achaar", "Ice Cream"]
+  },
+  Wednesday: {
+    Breakfast: ["Idli Sambhar", "Peanut / Coconut Chutney", "1 Egg / 2 Banana", "Sprouts", "Milk (200 ml)"],
+    Lunch: ["Soyabean", "Daal", "Roti", "Rice", "Salad", "Raita"],
+    Snacks: ["Pasta", "Red Sauce", "Chai / Coffee"],
+    Dinner: ["Egg Curry (2 Egg) / Rajma", "Roti", "Rice", "Salad", "Achaar"]
+  },
+  Thursday: {
+    Breakfast: ["Methi Paratha", "Dahi", "Sprouts", "1 Egg / 2 Banana", "Achaar"],
+    Lunch: ["Seasonal Sabji", "Daal", "Roti", "Rice", "Salad", "Gulab Jamun"],
+    Snacks: ["Sandwich (4 pcs)", "Red Sauce", "Chai / Coffee"],
+    Dinner: ["Mix Veg", "Daal", "Roti", "Rice", "Salad", "Achaar", "Ice Cream"]
+  },
+  Friday: {
+    Breakfast: ["Idli Sambhar", "Sprouts", "1 Egg / 2 Banana", "Milk (200 ml)"],
+    Lunch: ["Seasonal Sabji", "Daal", "Roti", "Rice", "Salad", "Raita"],
+    Snacks: ["Pav Bhaji (3 pcs)", "Chai / Coffee"],
+    Dinner: ["Chicken (150 g) / Paneer", "Roti", "Rice", "Salad", "Achaar"]
+  },
+  Saturday: {
+    Breakfast: ["Bread Jam", "Coffee", "1 Egg / 2 Banana", "Sprouts"],
+    Lunch: ["Malai Kofta", "Daal", "Pulao", "Salad", "Raita", "Achaar"],
+    Snacks: ["Aloo Bada", "Sauce", "Chai / Coffee"],
+    Dinner: ["Chole", "Roti", "Rice", "Salad", "Achaar"]
+  },
+  Sunday: {
+    Breakfast: ["Toast", "1 Egg / 2 Banana", "Sprouts", "Chai"],
+    Lunch: ["Chole Bhature", "Rice", "Salad", "Achaar", "Buttermilk"],
+    Snacks: ["Dhokla (3 pcs)", "Chai / Coffee"],
+    Dinner: ["Seasonal Sabji", "Daal", "Roti", "Rice", "Salad", "Achaar", "Ice Cream"]
+  }
+};
+var DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+var MEALS = ["Breakfast", "Lunch", "Snacks", "Dinner"];
+
+/* Pure helper: Date.getDay() (0 = Sunday) -> that day's menu object. */
+function menuFor(jsDayIndex) {
+  return MENU[DAY_NAMES[jsDayIndex]];
+}
+
+if (typeof document !== "undefined") {
+  var daysEl = document.getElementById("days");
+  var mealsEl = document.getElementById("meals");
+  var todayIdx = new Date().getDay();
+
+  var btnByDay = [];
+  function show(jsDayIndex) {
+    var menu = menuFor(jsDayIndex);
+    for (var i = 0; i < 7; i++) if (btnByDay[i]) btnByDay[i].classList.toggle("active", i === jsDayIndex);
+    mealsEl.innerHTML = "";
+    MEALS.forEach(function (meal) {
+      var card = document.createElement("div"); card.className = "card";
+      var h = document.createElement("h2"); h.textContent = meal;
+      var ul = document.createElement("ul");
+      menu[meal].forEach(function (item) {
+        var li = document.createElement("li"); li.textContent = item; ul.appendChild(li);
+      });
+      card.appendChild(h); card.appendChild(ul); mealsEl.appendChild(card);
+    });
+  }
+
+  // Day buttons in Monday-first order; btnByDay keeps the JS day index for each.
+  var order = [1, 2, 3, 4, 5, 6, 0];
+  order.forEach(function (jsIdx) {
+    var b = document.createElement("button");
+    b.textContent = DAY_NAMES[jsIdx].slice(0, 3) + (jsIdx === todayIdx ? " · today" : "");
+    b.addEventListener("click", function () { show(jsIdx); });
+    daysEl.appendChild(b); btnByDay[jsIdx] = b;
+  });
+  show(todayIdx);
+}
+</script>
+</body>
+</html>
